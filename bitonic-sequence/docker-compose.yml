@@ -1,0 +1,8 @@
+services:
+  bitonic-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ZIG_CACHE_DIR=/tmp/zig-cache
+      - ZIG_GLOBAL_CACHE_DIR=/tmp/zig-global-cache
