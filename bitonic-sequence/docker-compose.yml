@@ -6,3 +6,23 @@ services:
     environment:
       - ZIG_CACHE_DIR=/tmp/zig-cache
       - ZIG_GLOBAL_CACHE_DIR=/tmp/zig-global-cache
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  redis:
+    image: "redis:7-alpine"
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
