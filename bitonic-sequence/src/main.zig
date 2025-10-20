@@ -1,9 +1,9 @@
 const std = @import("std");
 const zap = @import("zap");
-const bitonic = @import("bitonic-array.zig")
+const bitonic = @import("bitonic-array.zig");
 
 pub fn main() !void {
-    var listener = zap.HttpListerner.init(.{
+    var listener = zap.HttpListener.init(.{
         .port = 8080,
         .on_request = handleRequest,
     });
@@ -34,7 +34,7 @@ fn handleBitonic(r: *const zap.Request) !void {
         return;
     };
 
-    var parsed = std.json.paserFromSlice(std.json.Value, allocator, body, .{}) catch {
+    var parsed = std.json.parseFromSlice(std.json.Value, allocator, body, .{}) catch {
         r.setStatus(.bad_request);
         r.sendBody("{ \"error\": \"Invalid JSON\" }") catch {};
         return;
@@ -46,29 +46,30 @@ fn handleBitonic(r: *const zap.Request) !void {
     const length = obj.object.get("length") orelse {
         r.setStatus(.bad_request);
         r.sendBody("{ \"error\": \"Missing 'length'\" }") catch {};
+        return;
     };
 
     const start = obj.object.get("start") orelse {
         r.setStatus(.bad_request);
-        r.sendBody("{ \"error\": \"Missing 'start'"\ }") catch {};
+        r.sendBody("{ \"error\": \"Missing 'start'\" }") catch {};
         return;
     };
 
     const end = obj.object.get("end") orelse {
         r.setStatus(.bad_request);
-        t.sendBody("{ \"error"\: \"Missing 'end'"\ }") catch {};
+        r.sendBody("{ \"error\": \"Missing 'end'\" }") catch {};
         return;
     };
 
     if (length != .integer or start != .integer or end != .integer) {
         r.setStatus(.bad_request);
-        r.sendBody("{ \"error"\: \"Invalid field types"\ }") catch {};
+        r.sendBody("{ \"error\": \"Invalid field types\" }") catch {};
         return;
     }
 
     const result = bitonic.bitonicArray(allocator, @intCast(length.integer), @intCast(start.integer), @intCast(end.integer)) catch {
         r.setStatus(.bad_request);
-        const errorMsg = std.fmt.allocPrint(allocator, "{{ \"error"\: \"It's not possible to generate sequence of length {} in range [{}, {}]"\ }}", .{length.integer, start.integer, end.integer}) catch "{ \"error"\: \"Invalid input"\ }";
+        const errorMsg = std.fmt.allocPrint(allocator, "{{ \"error\": \"It's not possible to generate sequence of length {} in range [{}, {}]\" }}", .{length.integer, start.integer, end.integer}) catch "{ \"error\": \"Invalid input\" }";
         r.sendBody(errorMsg) catch {};
         return;
     };
@@ -79,13 +80,13 @@ fn handleBitonic(r: *const zap.Request) !void {
 
     try jsonArray.appendSlice(allocator, "[");
     for (result, 0..) |val, i| {
-        if (i > 0) try jsonArry.appendSlice(allocator, ",");
-        const valStr = try std.fmt.allocPrint(allocator, "{}", .{val})
+        if (i > 0) try jsonArray.appendSlice(allocator, ",");
+        const valStr = try std.fmt.allocPrint(allocator, "{}", .{val});
         try jsonArray.appendSlice(allocator, valStr);
     }
     try jsonArray.appendSlice(allocator, "]");
 
-    const jsonResponse = try std.fmt.allocPrint(allocator, "{{ \"sequence"\: {s} }}", .{jsonArray});
+    const jsonResponse = try std.fmt.allocPrint(allocator, "{{ \"sequence\": {s} }}", .{jsonArray.items});
 
     r.setStatus(.ok);
     r.sendBody(jsonResponse) catch {};
