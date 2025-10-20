@@ -1,7 +1,7 @@
 const std = @import("std");
-const print = std.debug.print;
 
 pub fn bitonicArray(allocator: std.mem.Allocator, n: usize, l: i32, r: i32) ![]i32 {
+    const print = std.debug.print;
     print("fn bitonicArray: n = {}, l = {}, r = {}\n", .{n, l, r});
 
     const maxLimit = ((r - l) * 2) + 1;
