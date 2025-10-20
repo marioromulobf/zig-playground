@@ -14,7 +14,7 @@ pub fn main() !void {
     redisClient = blk: {
         print("Connecting to redis service...\n", .{});
 
-        var addressList = net.getAddressList(std.heap.page_allocator, "localhost", 6379) catch |err| {
+        var addressList = net.getAddressList(std.heap.page_allocator, "redis", 6379) catch |err| {
             print("Could not resolve redis service: {}\n", .{err});
             break :blk null;
         };
